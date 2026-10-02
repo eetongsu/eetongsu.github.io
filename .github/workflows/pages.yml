@@ -4,12 +4,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  schedule:
-    - cron: '17 7 * * *'
-      timezone: America/New_York
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -32,23 +29,10 @@ jobs:
           python-version: '3.13'
       - name: Check Scholar update safeguards
         run: python -m unittest discover -s scripts -p 'test_*.py'
-      - name: Refresh Google Scholar metrics
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: python scripts/update_scholar_metrics.py
       - name: Generate pages
         run: python generate.py
       - name: Check links and publication assets
         run: python scripts/check_site.py
-      - name: Save verified Scholar snapshot
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: |
-          git add data/profile.json docs/index.html docs/sitemap.xml
-          if ! git diff --cached --quiet; then
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'Update verified Google Scholar metrics'
-            git push origin HEAD:main
-          fi
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload website

@@ -1,0 +1,72 @@
+name: Sync Google Scholar metrics
+
+on:
+  schedule:
+    - cron: '17 7 * * *'
+      timezone: America/New_York
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: scholar-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check API configuration
+        id: config
+        env:
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+        run: |
+          if [ -n "$SERPAPI_API_KEY" ]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo '::notice::Add the SERPAPI_API_KEY repository secret to enable daily Scholar updates. Existing metrics are unchanged.'
+            echo 'Waiting for the SERPAPI_API_KEY repository secret. No Scholar request or website change was made.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Check out main
+        if: steps.config.outputs.ready == 'true'
+        uses: actions/checkout@v7
+        with:
+          ref: main
+      - name: Set up Python
+        if: steps.config.outputs.ready == 'true'
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Check update safeguards
+        if: steps.config.outputs.ready == 'true'
+        run: python -m unittest discover -s scripts -p 'test_*.py'
+      - name: Read Scholar metrics through SerpApi
+        if: steps.config.outputs.ready == 'true'
+        env:
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+        run: python scripts/update_scholar_metrics.py --source serpapi
+      - name: Generate and validate the website
+        if: steps.config.outputs.ready == 'true'
+        run: |
+          python generate.py
+          python scripts/check_site.py
+      - name: Save the verified snapshot
+        if: steps.config.outputs.ready == 'true'
+        run: |
+          git add -- data/profile.json docs/index.html docs/sitemap.xml
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Update Google Scholar metrics'
+          git push origin HEAD:main
+      - name: Publish the updated snapshot
+        if: steps.config.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main --repo "$GITHUB_REPOSITORY"

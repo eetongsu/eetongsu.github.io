@@ -3,10 +3,12 @@ import argparse
 from datetime import datetime
 from html.parser import HTMLParser
 import json
+import os
 from pathlib import Path
 import re
 import sys
 from urllib.parse import parse_qs, urlencode, urlsplit
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
@@ -75,22 +77,33 @@ def parse_metrics(document, expected_name):
         if not re.fullmatch(r'(?:0|[1-9]\d*|[1-9]\d{0,2}(?:,\d{3})+)', value):
             raise ValueError('A citation metric is not a complete nonnegative integer.')
         result[key] = int(value.replace(',', ''))
-    if result['citations'] < max(result['h_index'] ** 2, result['i10_index'] * 10):
+    return validate_metrics(result)
+
+
+def validate_metrics(metrics):
+    if any(type(value) is not int or value < 0 for value in metrics.values()):
+        raise ValueError('Citation metrics must be nonnegative integers.')
+    if metrics['citations'] < max(metrics['h_index'] ** 2, metrics['i10_index'] * 10):
         raise ValueError('The citation metrics are inconsistent.')
-    return result
+    return metrics
 
 
-def fetch_profile(profile_url):
+def scholar_author_id(profile_url):
     parsed = urlsplit(profile_url)
     author_ids = parse_qs(parsed.query).get('user', [])
     if parsed.scheme != 'https' or parsed.netloc != 'scholar.google.com' or parsed.path != '/citations' or len(author_ids) != 1:
         raise ValueError('Expected a public Google Scholar author-profile URL.')
+    return author_ids[0]
+
+
+def fetch_profile(profile_url):
+    author_id = scholar_author_id(profile_url)
     # Keep user= first: this public-profile route is explicitly allowed by Scholar robots.txt.
-    url = 'https://scholar.google.com/citations?' + urlencode({'user': author_ids[0], 'hl': 'en'})
+    url = 'https://scholar.google.com/citations?' + urlencode({'user': author_id, 'hl': 'en'})
     request = Request(url, headers={'User-Agent': USER_AGENT})
     with urlopen(request, timeout=30) as response:
         final = urlsplit(response.url)
-        if final.netloc != parsed.netloc or final.path != parsed.path or parse_qs(final.query).get('user') != author_ids:
+        if final.scheme != 'https' or final.netloc != 'scholar.google.com' or final.path != '/citations' or parse_qs(final.query).get('user') != [author_id]:
             raise ValueError('Scholar redirected away from the requested profile.')
         if 'text/html' not in response.headers.get('Content-Type', ''):
             raise ValueError('Scholar did not return an HTML profile.')
@@ -100,9 +113,50 @@ def fetch_profile(profile_url):
         return data.decode('utf-8')
 
 
-def update_profile(path, checked_date=None):
+def fetch_serpapi(profile_url, api_key):
+    if not api_key:
+        raise ValueError('SERPAPI_API_KEY is required for cloud updates.')
+    params = {'engine': 'google_scholar_author', 'author_id': scholar_author_id(profile_url),
+              'hl': 'en', 'api_key': api_key}
+    request = Request('https://serpapi.com/search.json?' + urlencode(params),
+                      headers={'User-Agent': USER_AGENT, 'Accept': 'application/json'})
+    with urlopen(request, timeout=45) as response:
+        if 'application/json' not in response.headers.get('Content-Type', ''):
+            raise ValueError('The API did not return JSON.')
+        data = response.read(2_000_001)
+        if len(data) > 2_000_000:
+            raise ValueError('The API returned an unexpectedly large response.')
+        return json.loads(data)
+
+
+def parse_serpapi_metrics(payload, expected_name, expected_author_id):
+    if payload.get('error') or payload.get('search_metadata', {}).get('status') != 'Success':
+        raise ValueError('The API did not complete a successful search.')
+    params = payload.get('search_parameters', {})
+    if params.get('engine') != 'google_scholar_author' or params.get('author_id') != expected_author_id:
+        raise ValueError('The API returned a different author profile.')
+    name = ' '.join(payload.get('author', {}).get('name', '').split())
+    if name.casefold() != expected_name.casefold():
+        raise ValueError('The API returned a different author name.')
+    table = payload.get('cited_by', {}).get('table', [])
+    result = {}
+    for key in ('citations', 'h_index', 'i10_index'):
+        rows = [row[key] for row in table if isinstance(row, dict) and key in row]
+        if len(rows) != 1 or not isinstance(rows[0], dict) or 'all' not in rows[0]:
+            raise ValueError('An all-time metric is missing or ambiguous in the API response.')
+        result[key] = rows[0]['all']
+    return validate_metrics(result)
+
+
+def update_profile(path, checked_date=None, source='direct', api_key=None):
     profile = json.loads(path.read_text(encoding='utf-8'))
-    metrics = parse_metrics(fetch_profile(profile['scholar']), profile['name'])
+    if source == 'serpapi':
+        metrics = parse_serpapi_metrics(fetch_serpapi(profile['scholar'], api_key),
+                                       profile['name'], scholar_author_id(profile['scholar']))
+    elif source == 'direct':
+        metrics = parse_metrics(fetch_profile(profile['scholar']), profile['name'])
+    else:
+        raise ValueError('Unknown citation data source.')
     if profile['metrics']['citations'] > 0 and metrics['citations'] == 0:
         raise ValueError('Unexpectedly empty citation metrics; review before replacing saved data.')
     checked_date = checked_date or datetime.now(ZoneInfo('America/New_York')).date().isoformat()
@@ -119,13 +173,16 @@ def update_profile(path, checked_date=None):
 def main():
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument('--profile', type=Path, default=ROOT / 'data' / 'profile.json')
+    cli.add_argument('--source', choices=('direct', 'serpapi'), default='direct')
     args = cli.parse_args()
     try:
-        print(json.dumps(update_profile(args.profile)))
+        print(json.dumps(update_profile(args.profile, source=args.source,
+                                        api_key=os.environ.get('SERPAPI_API_KEY'))))
         return 0
     except Exception as error:
-        # No retries, CAPTCHA handling, alternate proxies, or changes to the saved data.
-        print('Scholar sync failed (' + type(error).__name__ + '). Existing metrics and date were preserved.', file=sys.stderr)
+        # Never log the request URL or response body: either may contain an API key.
+        reason = 'HTTP ' + str(error.code) if isinstance(error, HTTPError) else type(error).__name__
+        print('Scholar sync failed (' + reason + '). Existing metrics and date were preserved.', file=sys.stderr)
         return 1
 
 
