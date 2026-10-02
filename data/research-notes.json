@@ -1,0 +1,62 @@
+{
+  "su2025review":{
+    "topics":["Safe learning","Reviews"],
+    "summary":"A review of safe reinforcement learning methods, power system applications, benchmarks, and practical deployment challenges.",
+    "overview":"Reinforcement learning can support power system operation and control, but exploration and policy deployment may violate operational constraints. This review organizes methods for incorporating safety into learning and decision-making, including Lagrangian approaches, safety layers, and Lyapunov-based techniques. It discusses applications in security control, real-time operation, and operational planning, as well as benchmarks and implementation challenges. The review is a useful entry point for comparing safety mechanisms and their assumptions; the strength of a safety claim depends on the particular method and setting.",
+    "questions":["Which mechanisms are used to incorporate safety constraints into reinforcement learning?","Where have safe RL methods been applied in power systems?","What challenges remain for scalable and robust deployment?"],
+    "keywords":["safe reinforcement learning","power system control","safety layers","Lagrangian relaxation","Lyapunov methods"],
+    "source":"https://arxiv.org/abs/2407.00304"
+  },
+  "su2025neural":{
+    "topics":["Safe learning","Stability"],
+    "summary":"Neural network certification incorporated into transient stability-constrained optimal power flow under renewable and load uncertainty.",
+    "overview":"A learned transient stability surrogate can accelerate preventive control, but its predictions require additional scrutiny under uncertain operating conditions. This paper combines a deep belief network with transient stability-constrained optimal power flow and uses the α,β-CROWN verifier to inform stability margins. The resulting certification is used within the optimization process to balance security and operating cost. Numerical evaluation uses a modified western South Carolina 500-bus system. The certification applies to the modeled network and specified uncertainty setting; it should be interpreted within those assumptions.",
+    "questions":["How can neural network certification inform transient stability-constrained OPF?","How are renewable-generation and load uncertainties addressed?","How can a certified surrogate support preventive dispatch?"],
+    "keywords":["transient stability","TSC-OPF","neural network certification","alpha beta CROWN","renewable uncertainty"],
+    "source":"https://arxiv.org/abs/2411.08329"
+  },
+  "su2025grid":{
+    "topics":["Grid technologies","Reviews"],
+    "summary":"A review of grid-enhancing technologies for clean energy systems, published in the inaugural volume of Nature Reviews Clean Technology.",
+    "overview":"This review addresses grid-enhancing technologies in the context of clean energy systems. It provides a broad research entry point for readers studying how electricity networks can accommodate the energy transition. The article appeared in the inaugural volume of Nature Reviews Clean Technology.",
+    "keywords":["grid-enhancing technologies","clean energy systems","renewable energy integration"],
+    "source":"https://doi.org/10.1038/s44359-024-00001-5"
+  },
+  "su2026multi":{
+    "topics":["Grid technologies","Uncertainty"],
+    "summary":"Multi-fidelity dynamic line rating, uncertainty calibration, and load-margin modeling for large-scale offshore wind integration.",
+    "overview":"This work combines multi-fidelity dynamic line rating with uncertainty calibration and learned load-margin models. It connects fast surrogate predictions to operational security quantities for systems with large-scale offshore wind generation. The study focuses on using transmission infrastructure more effectively while maintaining attention to uncertainty and system load margin.",
+    "keywords":["multi-fidelity dynamic line rating","load margin","offshore wind","uncertainty calibration"],
+    "source":"https://emconsta.github.io/pages/project-power-grid"
+  },
+  "su2025safe":{
+    "topics":["Safe learning","Stability"],
+    "summary":"Safe reinforcement learning for transient stability control of islanded microgrids with topology reconfiguration.",
+    "keywords":["safe reinforcement learning","islanded microgrids","transient stability control","topology reconfiguration"]
+  },
+  "tan2026gaussian":{
+    "topics":["Uncertainty","Reviews"],
+    "summary":"A review of Gaussian process techniques, applications, and research directions in power systems.",
+    "keywords":["Gaussian processes","power systems","uncertainty quantification"]
+  },
+  "su2024survey":{
+    "topics":["Stability","Reviews"],
+    "summary":"A survey of open-source power system dynamic simulators with grid-forming inverter capabilities for machine learning applications.",
+    "keywords":["open-source power system simulators","grid-forming inverters","dynamic simulation","machine learning"]
+  },
+  "su2024analytic":{
+    "topics":["Uncertainty"],
+    "summary":"Chance-constrained voltage regulation using an analytic neural network Gaussian process for distribution systems with PVs, batteries, and EVs.",
+    "keywords":["Gaussian processes","chance-constrained voltage regulation","active distribution systems"]
+  },
+  "su2023deep":{
+    "topics":["Stability","Uncertainty"],
+    "summary":"Deep sigma point processes for chance-constrained preventive control of power system transient stability.",
+    "keywords":["deep sigma point processes","transient stability","chance-constrained control"]
+  },
+  "su2023probabilistic":{
+    "topics":["Uncertainty"],
+    "summary":"A probabilistic physics-informed graph convolutional network for voltage prediction in active distribution systems.",
+    "keywords":["physics-informed graph convolutional networks","voltage prediction","distribution systems"]
+  }
+}

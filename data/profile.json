@@ -1,0 +1,309 @@
+{
+  "name": "Tong Su",
+  "email": "tong.su.th@dartmouth.edu",
+  "affiliation": "Dartmouth College",
+  "scholar": "https://scholar.google.com/citations?user=AXhvF3sAAAAJ",
+  "advisor": "https://sites.dartmouth.edu/cpeslab/junbo-zhao/",
+  "snapshot_date": "2026-10-01",
+  "metrics": {
+    "citations": 744,
+    "h_index": 14,
+    "i10_index": 17
+  },
+  "education": [
+    {
+      "dates": "2025–present",
+      "title": "Ph.D. Candidate in Electrical Engineering",
+      "institution": "Dartmouth College",
+      "description": "Advisor: Junbo Zhao. Research in power system dynamics and stability control with inverter-based resources."
+    },
+    {
+      "dates": "2022–2025",
+      "title": "Doctoral studies in Electrical Engineering",
+      "institution": "University of Connecticut",
+      "description": "Advisor: Junbo Zhao. Transferred to Dartmouth College in 2025."
+    },
+    {
+      "dates": "2019–2022",
+      "title": "M.S. in Electrical Engineering",
+      "institution": "Sichuan University",
+      "description": "Advisor: Youbo Liu. Machine learning for power system transient stability analysis and control."
+    },
+    {
+      "dates": "2015–2019",
+      "title": "B.E. in Electrical Engineering and Automation",
+      "institution": "Sichuan University",
+      "description": "Research interests included robot embedded control and power electronics design."
+    }
+  ],
+  "experience": [
+    {
+      "dates": "August 2025–present",
+      "title": "Research Assistant",
+      "institution": "Dartmouth College",
+      "description": "Power system dynamics, stability, and learning-based control."
+    },
+    {
+      "dates": "August 2022–August 2025",
+      "title": "Research Assistant",
+      "institution": "University of Connecticut",
+      "description": "Power system dynamics and stability control with inverter-based resources."
+    },
+    {
+      "dates": "May–August 2024",
+      "title": "Summer Research Intern",
+      "institution": "National Laboratory of the Rockies (NLR), formerly National Renewable Energy Laboratory (NREL)",
+      "description": "Inverter-based resource modeling, simulation, and related machine learning applications."
+    }
+  ],
+  "projects": [
+    {
+      "title": "DLR-RENEW",
+      "subtitle": "Dynamic Line Rating Robust Validation, Enhancement and Field Demonstration in New England with Changing Weather and Offshore Wind Integration",
+      "summary": "Field validation of dynamic line rating in New England under changing weather conditions and offshore wind integration.",
+      "funding": "U.S. Department of Energy (DOE)",
+      "sources": [
+        {
+          "label": "UConn project listing",
+          "url": "https://atmospheric-modeling-group.engineering.uconn.edu/funded-research/"
+        }
+      ]
+    },
+    {
+      "title": "SLOPE-Grid",
+      "subtitle": "Scalable Learning and Optimization for Secure and Economic Grid Operations",
+      "summary": "High-performance computing, machine learning, and optimization for grid operation, incorporating transient stability and uncertainty in operational decisions.",
+      "funding": "U.S. Department of Energy — Advanced Scientific Computing Research (ASCR) and Office of Electricity",
+      "partners": "Lawrence Livermore National Laboratory, Argonne National Laboratory, and Dartmouth College",
+      "sources": [
+        {
+          "label": "LLNL project overview",
+          "url": "https://computing.llnl.gov/projects/slope-grid"
+        },
+        {
+          "label": "Project website",
+          "url": "https://slope-grid.github.io/"
+        }
+      ]
+    },
+    {
+      "title": "Resilient Grid System and Offshore Wind Power Integration",
+      "summary": "Research on power-grid resilience and the integration of offshore wind generation.",
+      "funding": "U.S. Department of Energy / National Energy Technology Laboratory",
+      "sources": [
+        {
+          "label": "UConn project listing (PDF, p. 3)",
+          "url": "https://cee.engr.uconn.edu/wp-content/uploads/2025/08/Pena-CV-August-2025.pdf#page=3"
+        }
+      ]
+    },
+    {
+      "title": "Maximizing Transmission Line Capacity with Real-time Thermal and Stability Ratings",
+      "summary": "Investigation of transmission-line capacity using real-time thermal and stability ratings.",
+      "funding": "U.S. Department of Energy",
+      "sources": [
+        {
+          "label": "Connecticut public award record (PDF, p. 137)",
+          "url": "https://wp.cga.ct.gov/apa/wp-content/cgacustom/reports/FullReports/STATEWIDE%20FULL_20250327_FY2024.pdf#page=137"
+        }
+      ]
+    },
+    {
+      "title": "OPEN COG Grid",
+      "subtitle": "Open Extendable Coherent Models-Datasets for Cognitive Power Grids",
+      "summary": "Open power-system models and datasets for simulation and planning, including synthetic networks, emerging loads, and renewable generation.",
+      "funding": "U.S. Department of Energy, Office of Electricity",
+      "partners": "Lawrence Livermore National Laboratory, Texas A&M University, and National Laboratory of the Rockies (NLR), formerly National Renewable Energy Laboratory (NREL)",
+      "sources": [
+        {
+          "label": "DOE OSTI record",
+          "url": "https://www.osti.gov/biblio/2484228"
+        },
+        {
+          "label": "Public technical report (PDF)",
+          "url": "https://www.osti.gov/servlets/purl/2484228"
+        }
+      ]
+    },
+    {
+      "title": "Physics-Informed Intelligent and Proactive Building Load Management for Energy Resilience",
+      "summary": "Physics-informed building-load models and intelligent control to improve energy efficiency, power quality, and microgrid resilience.",
+      "funding": "U.S. Department of Defense — Environmental Security Technology Certification Program (ESTCP)",
+      "partners": "University of Connecticut and National Laboratory of the Rockies (NLR), formerly National Renewable Energy Laboratory (NREL)",
+      "sources": [
+        {
+          "label": "ESTCP project overview",
+          "url": "https://serdp-estcp.mil/projects/details/ddf81e56-fe50-43a2-be9f-272c0bbbf502/physics-informed-intelligent-and-proactive-building-load-management-for-energy-resilience"
+        },
+        {
+          "label": "UConn project announcement",
+          "url": "https://cpes.lab.uconn.edu/"
+        }
+      ]
+    },
+    {
+      "title": "Extraction and Characterization of Power System Operation Behavior Recognition Based on Big Data",
+      "summary": "Data-driven identification and characterization of power-system operating behavior.",
+      "funding": "National Natural Science Foundation of China",
+      "sources": [
+        {
+          "label": "Sichuan University project listing",
+          "url": "https://ee.scu.edu.cn/info/1029/5017.htm"
+        }
+      ]
+    },
+    {
+      "title": "Research on Self-Optimizing Operation Control Theory of Active Distribution Network Driven by Multilayer Machine Learning",
+      "summary": "Multilayer machine learning for self-optimizing operation and control of active distribution networks.",
+      "funding": "National Natural Science Foundation of China",
+      "sources": [
+        {
+          "label": "Sichuan University project listing",
+          "url": "https://ee.scu.edu.cn/info/1029/5017.htm"
+        }
+      ]
+    }
+  ],
+  "honors": [
+    [
+      "July 2026",
+      "Highly Cited Paper & Hot Paper — Web of Science",
+      "For “A review of safe reinforcement learning methods for modern power systems.” Web of Science designations as of July 2026."
+    ],
+    [
+      "2025",
+      "Front Cover — Proceedings of the IEEE",
+      "“A review of safe reinforcement learning methods for modern power systems” was selected as a front cover article."
+    ],
+    [
+      "July 2025",
+      "IEEE PES Technical Committee Prize Paper Award",
+      "For “Analytic deep learning and stepwise integrated gradients-based power system transient stability preventive control.”"
+    ],
+    [
+      "May 2025",
+      "Summer Predoctoral Fellowship",
+      ""
+    ],
+    [
+      "July 2024",
+      "Conference Participation Award",
+      ""
+    ],
+    [
+      "May 2024",
+      "Summer Predoctoral Fellowship",
+      ""
+    ],
+    [
+      "March 2024",
+      "IEEE PES Technical Committee Working Group Recognition Award for Outstanding Technical Report",
+      "For “Application of Spatio-Temporal Data-Driven and Machine Learning Algorithms for Security Assessment.”"
+    ],
+    [
+      "December 2023",
+      "IEEE Transactions on Power Systems Outstanding Reviewer",
+      "Recognition for 2023."
+    ],
+    [
+      "July 2023",
+      "IEEE PES General Meeting Best Paper",
+      "For “Analytic input convex neural networks-based model predictive control for power system transient stability enhancement.”"
+    ],
+    [
+      "July 2022",
+      "IEEE PES General Meeting Best Paper",
+      "For “Explainable Bayesian neural network for probabilistic transient stability analysis considering wind energy.”"
+    ],
+    [
+      "October 2021",
+      "National Scholarship for Postgraduate Students",
+      "China."
+    ],
+    [
+      "September 2019",
+      "First Prize Scholarship for M.Sc. Students",
+      ""
+    ],
+    [
+      "August 2018",
+      "First Prize, Sichuan Undergraduate Electronic Design Contest",
+      ""
+    ],
+    [
+      "June 2018",
+      "Third Prize, National Undergraduate Robot Competition (RoboMaster)",
+      ""
+    ],
+    [
+      "March 2018",
+      "Honorable Mention, Mathematical Contest in Modeling",
+      ""
+    ],
+    [
+      "October 2017",
+      "Second Prize, China Robot and Artificial Intelligence Competition",
+      ""
+    ],
+    [
+      "August 2017",
+      "Third Prize, 22nd FIRA Robot World Cup",
+      ""
+    ],
+    [
+      "July 2017",
+      "First Prize, National Robot Championship of China",
+      ""
+    ]
+  ],
+  "reviewing": [
+    "IEEE Transactions on Power Systems",
+    "IEEE Transactions on Smart Grid",
+    "IEEE Transactions on Sustainable Energy",
+    "IEEE Power Engineering Letters",
+    "IEEE Transactions on Industrial Informatics",
+    "IEEE Transactions on Power Delivery",
+    "IEEE Transactions on Transportation Electrification",
+    "IEEE Transactions on Industry Applications",
+    "IEEE Transactions on Control of Network Systems",
+    "IEEE Transactions on Artificial Intelligence",
+    "IEEE/CAA Journal of Automatica Sinica",
+    "IEEE Transactions on Cloud Computing",
+    "IEEE Access",
+    "Applied Energy",
+    "Energy",
+    "Energy Conversion and Management",
+    "International Journal of Electrical Power and Energy Systems",
+    "Journal of Modern Power Systems and Clean Energy",
+    "Protection and Control of Modern Power Systems",
+    "Electric Power Systems Research",
+    "IET Generation, Transmission & Distribution",
+    "IET Renewable Power Generation",
+    "CSEE Journal of Power and Energy Systems",
+    "Power Grid Engineering Science",
+    "Solar Energy",
+    "Advances in Electrical Engineering, Electronics and Energy",
+    "Engineering Applications of Artificial Intelligence",
+    "Discover Artificial Intelligence",
+    "Electrical Engineering",
+    "Scientific Reports",
+    "Discover Applied Sciences",
+    "Journal of Big Data",
+    "Cyber-Physical Energy Systems",
+    "Global Energy Interconnection",
+    "IEEE Open Access Journal of Power and Energy",
+    "IEEE Power & Energy Society General Meeting (PESGM)",
+    "IEEE SmartGridComm",
+    "IEEE Conference on Decision and Control (CDC)"
+  ],
+  "additional_reports": [
+    {
+      "title": "Data-Driven Methods for Secure Low-Inertia Grids",
+      "number": "PES-TR140",
+      "date": "2026",
+      "url": "https://resourcecenter.ieee-pes.org/publications/technical-reports/pes_tr_140_amps_040826",
+      "doi": "10.17023/d6n1-3q04"
+    }
+  ],
+  "google_site_verification": "LcRkvL1n2vfQF_eHHVUNOBxeGnowOiMIglO126kfmVs"
+}
