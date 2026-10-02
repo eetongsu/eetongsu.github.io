@@ -1,5 +1,6 @@
 """Generate portable, readable HTML from the author's verified bibliographic data."""
 from pathlib import Path
+from datetime import date
 import html, json, re
 from urllib.parse import quote
 
@@ -112,7 +113,9 @@ themes=[
  ('grid-technologies','Grid-enhancing technologies','Dynamic line ratings and operational flexibility for renewable energy integration.',['su2025grid','su2026multi','su2024dynamic'])]
 focus='<section class="section"><div class="sectionhead"><h2>Research focus</h2><a href="/research/">Research & projects</a></div><div class="focusgrid">'+''.join('<article class="focusitem"><div class="n">0'+str(i+1)+'</div><h3><a href="/research/#'+id+'">'+title+'</a></h3><p>'+desc+'</p></article>' for i,(id,title,desc,keys) in enumerate(themes))+'</div></section>'
 selected='<section class="section"><div class="sectionhead"><h2>Selected publications</h2><a href="/publications/">All research records</a></div>'+''.join(pub(bykey[k],True) for k in ['su2025review','su2025grid','su2025neural','su2026multi'])+'</section>'
-metric='<div class="metricbar"><div class="metrics"><div class="metric"><strong>744</strong><span>Citations</span></div><div class="metric"><strong>14</strong><span>h-index</span></div><div class="metric"><strong>17</strong><span>i10-index</span></div></div><div class="metricsource"><a href="'+scholar+'">Google Scholar</a><br>Snapshot · October 1, 2026</div></div>'
+synced_date=date.fromisoformat(profile['snapshot_date'])
+synced_label=synced_date.strftime('%B')+' '+str(synced_date.day)+', '+str(synced_date.year)
+metric='<div class="metricbar"><div class="metrics">'+''.join('<div class="metric"><strong>'+format(profile['metrics'][key],',')+'</strong><span>'+label+'</span></div>' for key,label in [('citations','Citations'),('h_index','h-index'),('i10_index','i10-index')])+'</div><div class="metricsource"><a href="'+scholar+'">Google Scholar</a><br>Last synced · '+e(synced_label)+'</div></div>'
 person={'@context':'https://schema.org','@type':'ProfilePage','name':'Tong Su · Power Systems & AI','url':BASE+'/', 'mainEntity':{'@type':'Person','@id':BASE+'/#person','name':'Tong Su','email':profile['email'],'jobTitle':'Ph.D. Candidate and Research Assistant','affiliation':{'@type':'CollegeOrUniversity','name':'Dartmouth College'},'sameAs':[scholar],'knowsAbout':['Power system transient stability','Safe reinforcement learning','Uncertainty quantification','Grid-enhancing technologies']}}
 page('/','Tong Su · Power Systems & AI','Tong Su, Ph.D. candidate and research assistant at Dartmouth College. Research in power system stability, safe learning, uncertainty, and grid-enhancing technologies.',hero()+focus+selected+metric,'About',structured=person)
 
@@ -199,7 +202,7 @@ for p in papers:
 
 (OUT/'citations/tong-su-publications.bib').write_text('\n'.join(bib(p) for p in sortpapers),encoding='utf-8')
 routes=['/','/research/','/publications/','/cv/']+['/publications/'+p['slug']+'/' for p in papers]
-(OUT/'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join('<url><loc>'+e(BASE+r)+'</loc><lastmod>2026-10-01</lastmod></url>' for r in routes)+'</urlset>',encoding='utf-8')
+(OUT/'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join('<url><loc>'+e(BASE+r)+'</loc><lastmod>'+e(profile['snapshot_date'] if r=='/' else '2026-10-01')+'</lastmod></url>' for r in routes)+'</urlset>',encoding='utf-8')
 (OUT/'robots.txt').write_text('User-agent: *\nAllow: /\n\nSitemap: '+BASE+'/sitemap.xml\n',encoding='utf-8')
 (OUT/'404.html').write_text('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found · Tong Su</title><link rel="stylesheet" href="/assets/site.css"><main class="wrap pagehead"><h1>Page not found</h1><p>The page may have moved.</p><a class="button" href="/">Return to Tong Su’s homepage</a></main></html>',encoding='utf-8')
 print(json.dumps({'pages':len(routes),'paper_pages':len(papers),'bibliographies':len(papers)+1,'doi_records':sum(bool(p.get('doi')) for p in papers)}))

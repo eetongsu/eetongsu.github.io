@@ -29,6 +29,8 @@ Pushing changes to `main` automatically regenerates the HTML, checks local links
 
 Keep publication slugs stable so existing links continue to work. When replacing a manuscript PDF, update its `bytes` value in `data/publications.json`; keep its citation cover and applicable reuse notice. Manuscript versions and copyright terms are stated in the PDFs and publication pages. Hosting this repository publicly does not change those terms.
 
-Google Scholar metrics and Web of Science distinctions are dated snapshots. Update their dates and values together after verification. Search Console ownership and indexing are managed separately for this website origin.
+Google Scholar citation metrics refresh daily at approximately 07:17 America/New_York through the same GitHub Actions workflow. A manual workflow run also refreshes them. Normal source pushes publish without contacting Scholar. Only the public author-profile page is requested, once per run, using its all-time metrics. No API key or Google login is required. The page displays the last successful sync date; network errors, challenges, incomplete tables, or mismatched authors stop that run and preserve the previous public website, metrics, and date. GitHub schedules may be delayed, and scheduled workflows may be disabled after 60 days without repository activity. Successful daily snapshots are committed to the repository. If a run fails, its Actions log identifies the failure category; after resolving an ongoing access problem, the workflow can be run manually again.
+
+Web of Science distinctions remain dated, separately verified snapshots and are not changed by the Scholar updater. Search Console ownership and indexing are managed separately for this website origin.
 
 Private source manuscripts, raw CV files, audit reports, credentials, and the former host's configuration are not part of this repository.
