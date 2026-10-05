@@ -2,9 +2,14 @@ name: Sync Google Scholar metrics
 
 on:
   schedule:
-    - cron: '17 7 * * *'
+    - cron: '17 7,11,15,19,23 * * *'
       timezone: America/New_York
   workflow_dispatch:
+    inputs:
+      force_refresh:
+        description: Fetch again even if today's snapshot is already saved
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -44,18 +49,41 @@ jobs:
       - name: Check update safeguards
         if: steps.config.outputs.ready == 'true'
         run: python -m unittest discover -s scripts -p 'test_*.py'
-      - name: Read Scholar metrics through SerpApi
+      - name: Check whether today's snapshot is due
         if: steps.config.outputs.ready == 'true'
+        id: due
+        env:
+          FORCE_REFRESH: ${{ inputs.force_refresh }}
+        run: |
+          python - <<'PY'
+          from datetime import datetime
+          import json
+          import os
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          today = datetime.now(ZoneInfo('America/New_York')).date().isoformat()
+          profile = json.loads(Path('data/profile.json').read_text(encoding='utf-8'))
+          due = profile.get('snapshot_date') != today or os.environ.get('FORCE_REFRESH') == 'true'
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('ready=' + str(due).lower() + '\n')
+          message = 'A Scholar refresh is due.' if due else 'Already synchronized today; no API request or deployment needed.'
+          print(message)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write(message + '\n')
+          PY
+      - name: Read Scholar metrics through SerpApi
+        if: steps.due.outputs.ready == 'true'
         env:
           SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
         run: python scripts/update_scholar_metrics.py --source serpapi
       - name: Generate and validate the website
-        if: steps.config.outputs.ready == 'true'
+        if: steps.due.outputs.ready == 'true'
         run: |
           python generate.py
           python scripts/check_site.py
       - name: Save the verified snapshot
-        if: steps.config.outputs.ready == 'true'
+        if: steps.due.outputs.ready == 'true'
         run: |
           git add -- data/profile.json docs/index.html docs/sitemap.xml
           if git diff --cached --quiet; then
@@ -66,7 +94,7 @@ jobs:
           git commit -m 'Update Google Scholar metrics'
           git push origin HEAD:main
       - name: Publish the updated snapshot
-        if: steps.config.outputs.ready == 'true'
+        if: steps.due.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run pages.yml --ref main --repo "$GITHUB_REPOSITORY"
