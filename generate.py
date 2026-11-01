@@ -60,7 +60,10 @@ def bib(p):
     return '@'+entrytype+'{'+key+',\n'+',\n'.join('  '+k+' = {'+esc(v)+'}' for k,v in fields.items())+'\n}\n'
 
 def manuscript_label(p):
-    return 'Preprint' if p['manuscript']['version'].startswith('Preprint') else 'Author manuscript'
+    version = p['manuscript']['version']
+    if version.startswith('Preprint'):return 'Preprint'
+    if version.startswith('Submitted'):return 'Submitted manuscript'
+    return 'Author manuscript'
 
 def links(p,detail=True):
     items=[]
@@ -202,7 +205,9 @@ for p in papers:
 
 (OUT/'citations/tong-su-publications.bib').write_text('\n'.join(bib(p) for p in sortpapers),encoding='utf-8')
 routes=['/','/research/','/publications/','/cv/']+['/publications/'+p['slug']+'/' for p in papers]
-(OUT/'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join('<url><loc>'+e(BASE+r)+'</loc><lastmod>'+e(profile['snapshot_date'] if r=='/' else '2026-10-01')+'</lastmod></url>' for r in routes)+'</urlset>',encoding='utf-8')
+publication_updates={'/publications/'+p['slug']+'/':p.get('updated','2026-10-01') for p in papers}
+route_updates={'/':profile['snapshot_date'],'/publications/':max(publication_updates.values()),**publication_updates}
+(OUT/'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join('<url><loc>'+e(BASE+r)+'</loc><lastmod>'+e(route_updates.get(r,'2026-10-01'))+'</lastmod></url>' for r in routes)+'</urlset>',encoding='utf-8')
 (OUT/'robots.txt').write_text('User-agent: *\nAllow: /\n\nSitemap: '+BASE+'/sitemap.xml\n',encoding='utf-8')
 (OUT/'404.html').write_text('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found · Tong Su</title><link rel="stylesheet" href="/assets/site.css"><main class="wrap pagehead"><h1>Page not found</h1><p>The page may have moved.</p><a class="button" href="/">Return to Tong Su’s homepage</a></main></html>',encoding='utf-8')
 print(json.dumps({'pages':len(routes),'paper_pages':len(papers),'bibliographies':len(papers)+1,'doi_records':sum(bool(p.get('doi')) for p in papers)}))

@@ -165,7 +165,18 @@
     "verifiedBy": "Crossref DOI metadata",
     "abstractSource": "",
     "venue": "IEEE Transactions on Power Systems",
-    "slug": "analytic-deep-learning-and-stepwise-integrated-gradients-based-power-system-transient-stability-preventive-control"
+    "slug": "analytic-deep-learning-and-stepwise-integrated-gradients-based-power-system-transient-stability-preventive-control",
+    "manuscript": {
+      "url": "/papers/liu2023analytic.pdf",
+      "version": "Submitted manuscript (author-provided)",
+      "copyrightYear": 2023,
+      "publisher": "IEEE",
+      "notice": "© 2023 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works.",
+      "policy": "https://journals.ieeeauthorcenter.ieee.org/become-an-ieee-journal-author/publishing-ethics/guidelines-and-policies/post-publication-policies/",
+      "pages": 14,
+      "bytes": 899916
+    },
+    "updated": "2026-11-01"
   },
   {
     "key": "su2023deep",
