@@ -62,7 +62,6 @@ def bib(p):
 def manuscript_label(p):
     version = p['manuscript']['version']
     if version.startswith('Preprint'):return 'Preprint'
-    if version.startswith('Submitted'):return 'Submitted manuscript'
     return 'Author manuscript'
 
 def links(p,detail=True):
