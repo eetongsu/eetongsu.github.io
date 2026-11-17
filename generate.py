@@ -151,7 +151,11 @@ for field,title in [('education','Education'),('experience','Research experience
     cv+='</div></section>'
 cv+='<section class="section twocol"><h2>Honors & awards</h2><div>'
 for date,title,detail in profile['honors']:cv+='<article class="record"><p class="date">'+e(date)+'</p><h3>'+e(title)+'</h3>'+('<p>'+e(detail)+'</p>' if detail else '')+'</article>'
-cv+='</div></section><section class="section twocol"><h2>Academic service</h2><div><h3>Peer review</h3><ul class="service">'+''.join('<li>'+e(x)+'</li>' for x in profile['reviewing'])+'</ul></div></section>'
+cv+='</div></section><section class="section twocol" id="academic-service"><h2>Academic service</h2><div><h3>Peer review</h3>'
+for group in profile['reviewing']:
+    venues=''.join('<li>'+e(venue_name)+'</li>' for venue_name in group['venues'])
+    cv+='<section class="review-group"><h4>'+e(group['title'])+'</h4><ul class="service">'+venues+'</ul></section>'
+cv+='</div></section>'
 cv+='<section class="section twocol"><h2>Technical reports</h2><div>'+''.join(additional_report(r) for r in profile['additional_reports'])+'<article class="record"><h3>Application of Spatio-Temporal Data-Driven and Machine Learning Algorithms for Security Assessment</h3><p>PES-TR104 · November 2022</p>'+recognition(bykey['segundo2022application'])+'<a href="https://resourcecenter.ieee-pes.org/publications/technical-reports/pes_tp_tr104_amps_112122">Official report page</a></article></div></section>'
 cv+='<section class="section"><div class="sectionhead"><h2>Publications</h2><a href="/citations/tong-su-publications.bib" download>Download BibTeX</a></div>'+''.join(pub(p) for p in sortpapers)+'</section>'
 page('/cv/','CV · Tong Su','Education, research experience, honors, academic service, and publications of Tong Su at Dartmouth College.',cv,'CV')
@@ -205,7 +209,7 @@ for p in papers:
 (OUT/'citations/tong-su-publications.bib').write_text('\n'.join(bib(p) for p in sortpapers),encoding='utf-8')
 routes=['/','/research/','/publications/','/cv/']+['/publications/'+p['slug']+'/' for p in papers]
 publication_updates={'/publications/'+p['slug']+'/':p.get('updated','2026-10-01') for p in papers}
-route_updates={'/':profile['snapshot_date'],'/publications/':max(publication_updates.values()),**publication_updates}
+route_updates={'/':profile['snapshot_date'],'/cv/':profile.get('cv_updated','2026-10-01'),'/publications/':max(publication_updates.values()),**publication_updates}
 (OUT/'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join('<url><loc>'+e(BASE+r)+'</loc><lastmod>'+e(route_updates.get(r,'2026-10-01'))+'</lastmod></url>' for r in routes)+'</urlset>',encoding='utf-8')
 (OUT/'robots.txt').write_text('User-agent: *\nAllow: /\n\nSitemap: '+BASE+'/sitemap.xml\n',encoding='utf-8')
 (OUT/'404.html').write_text('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found · Tong Su</title><link rel="stylesheet" href="/assets/site.css"><main class="wrap pagehead"><h1>Page not found</h1><p>The page may have moved.</p><a class="button" href="/">Return to Tong Su’s homepage</a></main></html>',encoding='utf-8')

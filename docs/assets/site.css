@@ -3,3 +3,6 @@
 .recognition{display:flex;flex-wrap:wrap;gap:7px;list-style:none;padding:0;margin:12px 0 8px}
 .recognition li{max-width:100%;border:1px solid #c5dacc;border-radius:3px;background:var(--light);color:var(--green);font-size:13px;font-weight:600;line-height:1.5;padding:4px 9px;overflow-wrap:anywhere}
 .recognition-note,.pagehead p.recognition-note{font-size:13px;color:var(--muted);margin:4px 0 10px}
+.review-group{margin-top:16px}
+.review-group+.review-group{margin-top:18px;padding-top:16px;border-top:1px solid var(--rule)}
+.review-group h4{color:var(--green);font-size:15px;line-height:1.4;font-weight:650;margin:0 0 9px;break-after:avoid}

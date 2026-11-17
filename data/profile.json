@@ -257,45 +257,73 @@
     ]
   ],
   "reviewing": [
-    "IEEE Transactions on Power Systems",
-    "IEEE Transactions on Smart Grid",
-    "IEEE Transactions on Sustainable Energy",
-    "IEEE Power Engineering Letters",
-    "IEEE Transactions on Industrial Informatics",
-    "IEEE Transactions on Power Delivery",
-    "IEEE Transactions on Transportation Electrification",
-    "IEEE Transactions on Industry Applications",
-    "IEEE Transactions on Control of Network Systems",
-    "IEEE Transactions on Artificial Intelligence",
-    "IEEE/CAA Journal of Automatica Sinica",
-    "IEEE Transactions on Cloud Computing",
-    "IEEE Access",
-    "Applied Energy",
-    "Energy",
-    "Energy Conversion and Management",
-    "International Journal of Electrical Power and Energy Systems",
-    "Journal of Modern Power Systems and Clean Energy",
-    "Protection and Control of Modern Power Systems",
-    "Electric Power Systems Research",
-    "IET Generation, Transmission & Distribution",
-    "IET Renewable Power Generation",
-    "CSEE Journal of Power and Energy Systems",
-    "Power Grid Engineering Science",
-    "Solar Energy",
-    "Advances in Electrical Engineering, Electronics and Energy",
-    "Engineering Applications of Artificial Intelligence",
-    "Discover Artificial Intelligence",
-    "Electrical Engineering",
-    "Scientific Reports",
-    "Discover Applied Sciences",
-    "Journal of Big Data",
-    "Cyber-Physical Energy Systems",
-    "Global Energy Interconnection",
-    "IEEE Open Access Journal of Power and Energy",
-    "IEEE Power & Energy Society General Meeting (PESGM)",
-    "IEEE SmartGridComm",
-    "IEEE Conference on Decision and Control (CDC)"
+    {
+      "title": "Power Systems & Grid Engineering",
+      "venues": [
+        "IEEE Transactions on Power Systems",
+        "IEEE Transactions on Smart Grid",
+        "IEEE Transactions on Sustainable Energy",
+        "IEEE Transactions on Power Delivery",
+        "IEEE Power Engineering Letters",
+        "IEEE Open Access Journal of Power and Energy",
+        "International Journal of Electrical Power & Energy Systems",
+        "Electric Power Systems Research",
+        "IET Generation, Transmission & Distribution",
+        "Journal of Modern Power Systems and Clean Energy",
+        "CSEE Journal of Power and Energy Systems",
+        "Protection and Control of Modern Power Systems",
+        "Global Energy Interconnection",
+        "Cyber-Physical Energy Systems",
+        "Power Grid Engineering Science"
+      ]
+    },
+    {
+      "title": "Energy & Electrification",
+      "venues": [
+        "npj Energy Systems and Resilience",
+        "Applied Energy",
+        "Energy",
+        "Energy Conversion and Management",
+        "IET Renewable Power Generation",
+        "Journal of Energy Storage",
+        "Solar Energy",
+        "IEEE Transactions on Transportation Electrification",
+        "IEEE Transactions on Industry Applications"
+      ]
+    },
+    {
+      "title": "Control, AI & Computing",
+      "venues": [
+        "IEEE Transactions on Control of Network Systems",
+        "IEEE Transactions on Artificial Intelligence",
+        "IEEE Transactions on Industrial Informatics",
+        "IEEE/CAA Journal of Automatica Sinica",
+        "Engineering Applications of Artificial Intelligence",
+        "IEEE Transactions on Cloud Computing",
+        "Journal of Big Data",
+        "Discover Artificial Intelligence"
+      ]
+    },
+    {
+      "title": "General Engineering & Science",
+      "venues": [
+        "Electrical Engineering",
+        "Advances in Electrical Engineering, Electronics and Energy",
+        "IEEE Access",
+        "Scientific Reports",
+        "Discover Applied Sciences"
+      ]
+    },
+    {
+      "title": "Conferences",
+      "venues": [
+        "IEEE Power & Energy Society General Meeting (PESGM)",
+        "IEEE SmartGridComm",
+        "IEEE Conference on Decision and Control (CDC)"
+      ]
+    }
   ],
+  "cv_updated": "2026-11-17",
   "additional_reports": [
     {
       "title": "Data-Driven Methods for Secure Low-Inertia Grids",
