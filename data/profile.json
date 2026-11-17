@@ -256,6 +256,14 @@
       ""
     ]
   ],
+  "conference_service": [
+    {
+      "date": "July 20, 2026",
+      "role": "Session Chair",
+      "session": "Grid Transformation Best Paper Session",
+      "conference": "2026 IEEE Power & Energy Society General Meeting (PESGM)"
+    }
+  ],
   "reviewing": [
     {
       "title": "Power Systems & Grid Engineering",

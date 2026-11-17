@@ -151,7 +151,10 @@ for field,title in [('education','Education'),('experience','Research experience
     cv+='</div></section>'
 cv+='<section class="section twocol"><h2>Honors & awards</h2><div>'
 for date,title,detail in profile['honors']:cv+='<article class="record"><p class="date">'+e(date)+'</p><h3>'+e(title)+'</h3>'+('<p>'+e(detail)+'</p>' if detail else '')+'</article>'
-cv+='</div></section><section class="section twocol" id="academic-service"><h2>Academic service</h2><div><h3>Peer review</h3>'
+cv+='</div></section><section class="section twocol" id="academic-service"><h2>Academic service</h2><div>'
+for service in profile.get('conference_service',[]):
+    cv+='<article class="record"><p class="date">'+e(service['date'])+'</p><h3>'+e(service['role'])+'</h3><strong>'+e(service['session'])+'</strong><p>'+e(service['conference'])+'</p></article>'
+cv+='<h3>Peer review</h3>'
 for group in profile['reviewing']:
     venues=''.join('<li>'+e(venue_name)+'</li>' for venue_name in group['venues'])
     cv+='<section class="review-group"><h4>'+e(group['title'])+'</h4><ul class="service">'+venues+'</ul></section>'
