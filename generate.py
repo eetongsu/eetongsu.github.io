@@ -94,11 +94,14 @@ def header(active):
     return '<a class="skip" href="#main">Skip to content</a><header class="topbar"><div class="wrap nav"><a class="brand" href="/">Tong Su<span>Dartmouth College</span></a><nav class="navlinks" aria-label="Main navigation">'+''.join('<a href="'+url+'"'+(' aria-current="page"' if label==active else '')+'>'+label+'</a>' for label,url in items)+'</nav></div></header>'
 
 def footer():
-    return '<footer class="footer" id="contact"><div class="wrap"><div class="footmain"><div><h2>Let’s connect.</h2><p>Research on reliable, renewable-rich power systems.</p><a href="mailto:'+profile['email']+'">'+profile['email']+'</a></div><div class="footlinks"><a href="'+scholar+'">Google Scholar</a><a href="'+profile['advisor']+'">CREATE Lab</a><a href="/cv/">CV</a></div></div><div class="footbottom"><span>© 2026 Tong Su</span><span>Updated October 2026 · Dartmouth College</span></div></div></footer>'
+    return '<footer class="footer" id="contact"><div class="wrap"><div class="footmain"><div><h2>Let’s connect.</h2><p>Research on reliable, renewable-rich power systems.</p><a href="mailto:'+profile['email']+'">'+profile['email']+'</a></div><div class="footlinks"><a href="'+scholar+'">Google Scholar</a><a href="'+profile['advisor']+'">CREATE Lab</a><a href="/cv/">CV</a><button type="button" data-analytics-settings hidden>Privacy settings</button></div></div><div class="footbottom"><span>© 2026 Tong Su</span><span>Updated October 2026 · Dartmouth College</span></div></div></footer>'
 
 ICON="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2307553b'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-family='Georgia' font-size='33' fill='white'%3ETS%3C/text%3E%3C/svg%3E"
 def page(path,title,description,body,active='',extra='',structured=None):
     dest=OUT/path.lstrip('/')/'index.html';dest.parent.mkdir(parents=True,exist_ok=True)
+    extra += '<link rel="stylesheet" href="/assets/analytics.css"><script src="/assets/analytics.js" defer></script>'
+    if path == '/':
+        extra += '<link rel="stylesheet" href="/assets/visitor-map.css"><script src="/assets/visitor-map.js" defer></script>'
     if path == '/' and profile.get('google_site_verification'):
         extra += '<meta name="google-site-verification" content="'+e(profile['google_site_verification'])+'">'
     if structured is None:structured={'@context':'https://schema.org','@type':'WebPage','name':title,'url':BASE+path}
@@ -119,7 +122,8 @@ synced_date=date.fromisoformat(profile['snapshot_date'])
 synced_label=synced_date.strftime('%B')+' '+str(synced_date.day)+', '+str(synced_date.year)
 metric='<div class="metricbar"><div class="metrics">'+''.join('<div class="metric"><strong>'+format(profile['metrics'][key],',')+'</strong><span>'+label+'</span></div>' for key,label in [('citations','Citations'),('h_index','h-index'),('i10_index','i10-index')])+'</div><div class="metricsource"><a href="'+scholar+'">Google Scholar</a><br>Last synced · '+e(synced_label)+'</div></div>'
 person={'@context':'https://schema.org','@type':'ProfilePage','name':'Tong Su · Power Systems & AI','url':BASE+'/', 'mainEntity':{'@type':'Person','@id':BASE+'/#person','name':'Tong Su','email':profile['email'],'jobTitle':'Ph.D. Candidate and Research Assistant','affiliation':{'@type':'CollegeOrUniversity','name':'Dartmouth College'},'sameAs':[scholar],'knowsAbout':['Power system transient stability','Safe reinforcement learning','Uncertainty quantification','Grid-enhancing technologies']}}
-page('/','Tong Su · Power Systems & AI','Tong Su, Ph.D. candidate and research assistant at Dartmouth College. Research in power system stability, safe learning, uncertainty, and grid-enhancing technologies.',hero()+focus+selected+metric,'About',structured=person)
+visitor_map='<section id="visitor-map" class="section" aria-labelledby="visitor-map-heading" hidden><h2 id="visitor-map-heading">Visitors by country or region</h2></section>'
+page('/','Tong Su · Power Systems & AI','Tong Su, Ph.D. candidate and research assistant at Dartmouth College. Research in power system stability, safe learning, uncertainty, and grid-enhancing technologies.',hero()+focus+selected+metric+visitor_map,'About',structured=person)
 
 sortpapers=sorted(papers,key=lambda p:(-(int(p.get('year') or 0)),p['title'].lower()))
 options=''.join('<option>'+t+'</option>' for t in ['Safe learning','Stability','Uncertainty','Grid technologies','Reviews','Other research'])
