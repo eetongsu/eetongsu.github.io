@@ -1,4 +1,4 @@
-/* Optional first-party consent controls for this site's GA4 stream. */
+/* GA4 measurement defaults and the visitor's footer preference. */
 (() => {
   if (location.origin !== 'https://eetongsu.github.io') return;
 
@@ -14,27 +14,38 @@
     if (typeof id !== 'string' || !/^G-[A-Z0-9]+$/.test(id)) return;
 
     const key = 'tong-su.analytics-consent.v2';
+    const legacyKey = 'tong-su.analytics-consent.v1';
     const disabled = 'ga-disable-' + id;
+    const privacySignal = navigator.globalPrivacyControl === true || navigator.doNotTrack === '1';
     let tagStarted = false;
-    let choice;
-    try {
-      choice = localStorage.getItem(key);
-      if (!choice && localStorage.getItem('tong-su.analytics-consent.v1') === 'decline') {
-        choice = 'decline';
-      }
-    } catch { /* Storage may be disabled. */ }
 
-    function enable() {
-      if (tagStarted) return;
-      tagStarted = true;
+    function savedChoice() {
+      try {
+        const value = localStorage.getItem(key);
+        if (value === 'allow' || value === 'decline') return value;
+        return localStorage.getItem(legacyKey) === 'decline' ? 'decline' : null;
+      } catch { return 'decline'; }
+    }
+    let choice = savedChoice();
+
+    function measure() {
       window[disabled] = false;
+      if (tagStarted) {
+        if (choice === 'allow') window.gtag('consent', 'update', { analytics_storage: 'granted' });
+        return;
+      }
+      tagStarted = true;
       window.dataLayer = window.dataLayer || [];
       window.gtag = function () { window.dataLayer.push(arguments); };
       const noAds = {
         ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'
       };
-      window.gtag('consent', 'default', { ...noAds, analytics_storage: 'denied' });
-      window.gtag('consent', 'update', { ...noAds, analytics_storage: 'granted' });
+      window.gtag('consent', 'default', {
+        ...noAds, analytics_storage: choice === 'allow' ? 'granted' : 'denied'
+      });
+      if (choice !== 'allow') {
+        window.gtag('consent', 'default', { region: ['US'], analytics_storage: 'granted' });
+      }
       window.gtag('js', new Date());
       window.gtag('config', id, {
         allow_google_signals: false, allow_ad_personalization_signals: false,
@@ -47,16 +58,21 @@
       document.head.append(tag);
     }
 
-    function disable() {
-      window[disabled] = true;
-      for (const cookie of document.cookie.split(';')) {
-        const name = cookie.trim().split('=')[0];
-        if (name.startsWith('tsresearch')) {
-          document.cookie = name + '=; Max-Age=0; Path=/; Domain=' + location.hostname + '; Secure';
-        }
+    function applyChoice() {
+      if (!privacySignal && choice !== 'decline') {
+        measure();
+        return;
       }
-      // Drop the loaded tag and its event listeners immediately after withdrawal.
-      if (tagStarted) location.reload();
+      window[disabled] = true;
+      try {
+        for (const cookie of document.cookie.split(';')) {
+          const name = cookie.trim().split('=')[0];
+          if (name.startsWith('tsresearch')) {
+            document.cookie = name + '=; Max-Age=0; Path=/; Domain=' + location.hostname + '; Secure';
+          }
+        }
+      } catch { /* Cookies may be blocked. */ }
+      if (tagStarted && savedChoice() === 'decline') location.reload();
     }
 
     const panel = document.createElement('aside');
@@ -65,50 +81,50 @@
     panel.id = 'analytics-choice';
     panel.hidden = true;
     panel.innerHTML = '<div class="wrap analytics-inner"><div>' +
-      '<h2 id="analytics-heading" tabindex="-1">Optional visitor analytics</h2>' +
-      '<p>Allow Google Analytics cookies to measure page visits, PDF link clicks and ' +
-      'outbound links. The public map keeps a cumulative record by country or region, ' +
-      'shown in ranges starting at one active user. You can change your choice in the footer. ' +
+      '<h2 id="analytics-heading" tabindex="-1">Visitor analytics</h2>' +
+      '<p>This site uses Google Analytics to measure page views, PDF clicks and outgoing links. ' +
+      'Analytics cookies are on by default in the US. Elsewhere, visits are measured without analytics cookies ' +
+      'unless you allow them. The public map shows cumulative visitor ranges by country or region. ' +
       '<a href="https://policies.google.com/technologies/partner-sites">How Google uses this data</a>.</p>' +
-      '<p class="analytics-status" hidden></p></div><div class="analytics-actions">' +
-      '<button type="button" data-consent="allow">Allow analytics</button>' +
-      '<button type="button" data-consent="decline">Decline analytics</button></div></div>';
+      '<p class="analytics-status"></p></div><div class="analytics-actions">' +
+      '<button type="button" data-consent="allow">Allow analytics cookies</button>' +
+      '<button type="button" data-consent="decline">Turn off analytics</button></div></div>';
     const status = panel.querySelector('.analytics-status');
     settings.setAttribute('aria-controls', panel.id);
-    function display(moveFocus) {
-      const undecided = choice !== 'allow' && choice !== 'decline';
-      const open = undecided || moveFocus;
+    function display(open) {
       panel.hidden = !open;
       settings.setAttribute('aria-expanded', String(open));
-      status.hidden = undecided;
-      status.textContent = choice === 'allow' ? 'Analytics is on.' : 'Analytics is off.';
-      if (moveFocus) {
-        settings.closest('footer').before(panel);
-        panel.querySelector('h2').focus();
-      }
+      if (privacySignal) status.textContent = 'Analytics is off because your browser requests privacy.';
+      else if (choice === 'decline') status.textContent = 'Analytics is off for this browser.';
+      else if (choice === 'allow') status.textContent = 'Analytics cookies are enabled for this browser.';
+      else status.textContent = 'This browser uses the regional default.';
+      if (open) panel.querySelector('h2').focus();
     }
 
-    document.querySelector('main').before(panel);
+    settings.closest('footer').before(panel);
     settings.hidden = false;
-    settings.addEventListener('click', () => display(true));
+    settings.addEventListener('click', () => display(panel.hidden));
     panel.querySelectorAll('[data-consent]').forEach(button => {
+      if (privacySignal && button.dataset.consent === 'allow') button.disabled = true;
       button.addEventListener('click', () => {
-        const atFooter = panel.nextElementSibling === settings.closest('footer');
         choice = button.dataset.consent;
         try { localStorage.setItem(key, choice); } catch { /* Keep choice for this page. */ }
         display(false);
-        if (choice === 'allow') enable(); else disable();
-        if (atFooter) settings.focus();
+        settings.focus();
+        applyChoice();
       });
     });
     window.addEventListener('storage', event => {
-      if (event.key !== key && event.key !== null) return;
-      choice = event.newValue;
+      if (event.key !== key && event.key !== legacyKey && event.key !== null) return;
+      const next = savedChoice();
+      if (next === choice) return;
+      choice = next;
       display(false);
-      if (choice === 'allow') enable(); else disable();
+      if (tagStarted && choice === null) location.reload();
+      else applyChoice();
     });
     display(false);
-    if (choice === 'allow') enable();
+    applyChoice();
   }
 
   // A missing configuration or a failed first-party request leaves collection off.
