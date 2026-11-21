@@ -26,9 +26,11 @@
 
   async function renderMap() {
     const snapshot = await readAsset('visitor-countries.json');
-    if (!snapshot || !/^\d{4}-\d{2}-\d{2}$/.test(snapshot.end_date)) return;
+    if (!snapshot || !/^\d{4}-\d{2}-\d{2}$/.test(snapshot.end_date)) throw new Error('Missing map date');
     const lastDay = new Date(snapshot.end_date + 'T12:00:00Z');
-    if (!Number.isFinite(lastDay.valueOf()) || lastDay.toISOString().slice(0, 10) !== snapshot.end_date) return;
+    if (!Number.isFinite(lastDay.valueOf()) || lastDay.toISOString().slice(0, 10) !== snapshot.end_date) {
+      throw new Error('Invalid map date');
+    }
     const reported = Object.entries(snapshot.countries || {}).filter(
       ([code, band]) => /^[A-Z]{2}$/.test(code) && bands.has(band)
     );
@@ -128,9 +130,9 @@
       period = 'Since ' + formatDate.format(trackingStart) + ' · Updated ' + formatDate.format(lastDay);
     }
     section.append(element('p', 'visitor-period', period), layout);
-    section.hidden = false;
   }
 
-  // The homepage remains usable while the first report is pending or unavailable.
-  renderMap().catch(() => {});
+  renderMap().catch(() => {
+    section.append(element('p', 'visitor-period', 'The visitor map is temporarily unavailable.'));
+  });
 })();

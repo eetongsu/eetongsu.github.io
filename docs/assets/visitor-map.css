@@ -1,4 +1,4 @@
-#visitor-map { padding-bottom: 0; }
+#visitor-map { padding-bottom: 0; scroll-margin-top: 5rem; }
 #visitor-map h2 { margin-bottom: .35rem; }
 .visitor-period, .visitor-readout, .visitor-note { color: var(--muted); }
 .visitor-period { margin: 0 0 1.75rem; font-size: 1rem; }
