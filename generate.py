@@ -1,11 +1,13 @@
 """Generate portable, readable HTML from the author's verified bibliographic data."""
 from pathlib import Path
 from datetime import date
+from hashlib import sha256
 import html, json, re
 from urllib.parse import quote
 
 ROOT=Path(__file__).resolve().parent
 OUT=ROOT/'docs'
+analytics_version = sha256((OUT/'assets/analytics.js').read_text(encoding='utf-8').encode('utf-8')).hexdigest()[:12]
 BASE='https://eetongsu.github.io'
 profile=json.loads((ROOT/'data/profile.json').read_text(encoding='utf-8'))
 papers=json.loads((ROOT/'data/publications.json').read_text(encoding='utf-8'))
@@ -99,7 +101,7 @@ def footer():
 ICON="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2307553b'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-family='Georgia' font-size='33' fill='white'%3ETS%3C/text%3E%3C/svg%3E"
 def page(path,title,description,body,active='',extra='',structured=None):
     dest=OUT/path.lstrip('/')/'index.html';dest.parent.mkdir(parents=True,exist_ok=True)
-    extra += '<link rel="stylesheet" href="/assets/analytics.css"><script src="/assets/analytics.js" defer></script>'
+    extra += f'<link rel="stylesheet" href="/assets/analytics.css"><script src="/assets/analytics.js?v={analytics_version}" defer></script>'
     if path == '/':
         extra += '<link rel="stylesheet" href="/assets/visitor-map.css"><script src="/assets/visitor-map.js" defer></script>'
     if path == '/' and profile.get('google_site_verification'):
