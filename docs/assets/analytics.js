@@ -13,11 +13,16 @@
     const { measurement_id: id } = await response.json();
     if (typeof id !== 'string' || !/^G-[A-Z0-9]+$/.test(id)) return;
 
-    const key = 'tong-su.analytics-consent.v1';
+    const key = 'tong-su.analytics-consent.v2';
     const disabled = 'ga-disable-' + id;
     let tagStarted = false;
     let choice;
-    try { choice = localStorage.getItem(key); } catch { /* Storage may be disabled. */ }
+    try {
+      choice = localStorage.getItem(key);
+      if (!choice && localStorage.getItem('tong-su.analytics-consent.v1') === 'decline') {
+        choice = 'decline';
+      }
+    } catch { /* Storage may be disabled. */ }
 
     function enable() {
       if (tagStarted) return;
@@ -33,6 +38,7 @@
       window.gtag('js', new Date());
       window.gtag('config', id, {
         allow_google_signals: false, allow_ad_personalization_signals: false,
+        content_group: 'public-visitor-map-v2',
         cookie_domain: location.hostname, cookie_prefix: 'tsresearch'
       });
       const tag = document.createElement('script');
@@ -61,8 +67,8 @@
     panel.innerHTML = '<div class="wrap analytics-inner"><div>' +
       '<h2 id="analytics-heading" tabindex="-1">Optional visitor analytics</h2>' +
       '<p>Allow Google Analytics cookies to measure page visits, PDF link clicks and ' +
-      'outbound links. The public map groups visitors by country or region over 90 days ' +
-      'and shows areas with at least five active users. You can change your choice in the footer. ' +
+      'outbound links. The public map keeps a cumulative record by country or region, ' +
+      'shown in ranges starting at one active user. You can change your choice in the footer. ' +
       '<a href="https://policies.google.com/technologies/partner-sites">How Google uses this data</a>.</p>' +
       '<p class="analytics-status" hidden></p></div><div class="analytics-actions">' +
       '<button type="button" data-consent="allow">Allow analytics</button>' +

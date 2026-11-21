@@ -9,7 +9,7 @@ from unittest.mock import patch
 from update_visitor_countries import public_snapshot, refresh, report_query
 
 
-END = date(2026, 11, 20)
+END = date(2027, 11, 21)
 
 
 def report(*entries):
@@ -26,21 +26,41 @@ class CountryMapTests(unittest.TestCase):
     def test_query_scopes_domain_and_period(self):
         query = report_query(END)
         span, = query["dateRanges"]
-        self.assertEqual((date.fromisoformat(span["endDate"]) - date.fromisoformat(span["startDate"])).days, 89)
-        self.assertEqual(query["dimensionFilter"]["filter"], {"fieldName": "hostName", "stringFilter": {
-            "matchType": "EXACT", "value": "eetongsu.github.io"}})
+        self.assertEqual(span, {"startDate": "2026-11-21", "endDate": END.isoformat()})
+        self.assertEqual(query["dimensionFilter"]["andGroup"]["expressions"], [
+            {"filter": {"fieldName": "hostName", "stringFilter": {
+                "matchType": "EXACT", "value": "eetongsu.github.io"}}},
+            {"filter": {"fieldName": "contentGroup", "stringFilter": {
+                "matchType": "EXACT", "value": "public-visitor-map-v2"}}}])
+        self.assertEqual(query["metricFilter"]["filter"]["numericFilter"]["value"], {"int64Value": "1"})
 
     def test_only_coarse_public_ranges(self):
-        raw = report(("US", "4"), ("FR", "5"), ("JP", "19"), ("GB", "20"), ("BR", "49"),
+        raw = report(("US", "4"), ("CA", "1"), ("AU", "0"), ("FR", "5"), ("JP", "19"), ("GB", "20"), ("BR", "49"),
                      ("DE", "50"), ("(not set)", "932"), ("ZZ", "329"))
         self.assertEqual(public_snapshot(raw, END), {
-            "end_date": "2026-11-20", "countries": {
-                "BR": "20–49", "DE": "50+", "FR": "5–19", "GB": "20–49", "JP": "5–19"}})
+            "start_date": "2026-11-21", "end_date": END.isoformat(), "countries": {
+                "US": "1–4", "CA": "1–4", "BR": "20–49", "DE": "50+", "FR": "5–19", "GB": "20–49", "JP": "5–19"}})
 
-    def test_valid_empty_report_can_hide_map(self):
+    def test_valid_empty_report_has_dates_for_the_base_map(self):
         empty = report()
         del empty["rowCount"], empty["rows"]  # GA4 may omit proto3 fields at their defaults.
-        self.assertEqual(public_snapshot(empty, END), {"end_date": END.isoformat(), "countries": {}})
+        self.assertEqual(public_snapshot(empty, END), {
+            "start_date": "2026-11-21", "end_date": END.isoformat(), "countries": {}})
+
+    def test_history_survives_omissions_and_retries(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder, "visitor-countries.json")
+            path.write_text(json.dumps({"end_date": "2026-11-21", "countries": {"DE": "5–19"}}))
+            cases = [
+                (report(("US", "1")), {"DE": "5–19", "US": "1–4"}),
+                (report(("US", "1")), {"DE": "5–19", "US": "1–4"}),
+                (report(("US", "5")), {"DE": "5–19", "US": "5–19"}),
+                (report(), {"DE": "5–19", "US": "5–19"}),
+            ]
+            for response, expected in cases:
+                with patch("update_visitor_countries.urlopen", return_value=io.BytesIO(json.dumps(response).encode())):
+                    refresh("123456", "test", END, path)
+                self.assertEqual(json.loads(path.read_text(encoding="utf-8"))["countries"], expected)
 
     def test_failure_preserves_previous_snapshot(self):
         cases = [report(("US", "3.5")), report(("FR", "5"), ("FR", "7")),

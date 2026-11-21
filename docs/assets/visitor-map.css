@@ -6,7 +6,8 @@
 .visitor-figure { margin: 0; min-width: 0; }
 .visitor-figure svg { width: 100%; height: auto; display: block; }
 .visitor-land, .visitor-points { fill: #e0e8e3; stroke: white; stroke-width: .65; stroke-linejoin: round; }
-.visitor-low { fill: #95c6a7; background-color: #95c6a7; }
+.visitor-first { fill: #b9d8c6; background-color: #b9d8c6; }
+.visitor-low { fill: #83b998; background-color: #83b998; }
 .visitor-medium { fill: #42916d; background-color: #42916d; }
 .visitor-high { fill: #07553b; background-color: #07553b; }
 .visitor-region { cursor: pointer; }

@@ -2,7 +2,7 @@
   const section = document.getElementById('visitor-map');
   if (!section) return;
 
-  const bands = new Map([['5–19', 'low'], ['20–49', 'medium'], ['50+', 'high']]);
+  const bands = new Map([['1–4', 'first'], ['5–19', 'low'], ['20–49', 'medium'], ['50+', 'high']]);
   const svgNamespace = 'http://www.w3.org/2000/svg';
 
   function element(name, className, text) {
@@ -32,16 +32,13 @@
     const reported = Object.entries(snapshot.countries || {}).filter(
       ([code, band]) => /^[A-Z]{2}$/.test(code) && bands.has(band)
     );
-    if (!reported.length) return;
-
     const { features } = await readAsset('visitor-geography.json');
     const bandByCode = new Map(reported);
-    if (!reported.some(([code]) => Object.hasOwn(features, code))) return;
 
     const names = new Intl.DisplayNames(['en'], { type: 'region' });
-    const period = new Intl.DateTimeFormat('en-US', {
+    const formatDate = new Intl.DateTimeFormat('en-US', {
       month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC'
-    }).format(lastDay);
+    });
     const layout = element('div', 'visitor-layout');
     const figure = element('figure', 'visitor-figure');
     const map = svgElement('svg', {
@@ -49,7 +46,9 @@
     });
     const land = svgElement('g', {class: 'visitor-land'});
     const points = svgElement('g', {class: 'visitor-points'});
-    const readout = element('figcaption', 'visitor-readout', 'Select a highlighted country or region.');
+    const readout = element('figcaption', 'visitor-readout', reported.length
+      ? 'Select a highlighted country or region.'
+      : 'No country or region has been reported yet.');
     const clearReadout = () => { readout.textContent = 'Select a highlighted country or region.'; };
     let selected = null;
 
@@ -120,9 +119,15 @@
       list.append(item);
     }
     details.append(list);
-    key.append(legend, element('p', 'visitor-note', 'Regions with at least five active users are shown.'), details);
+    key.append(legend);
+    if (reported.length) key.append(details);
     layout.append(figure, key);
-    section.append(element('p', 'visitor-period', '90 days through ' + period), layout);
+    let period = 'All-time visits';
+    if (snapshot.start_date) {
+      const trackingStart = new Date(snapshot.start_date + 'T12:00:00Z');
+      period = 'Since ' + formatDate.format(trackingStart) + ' · Updated ' + formatDate.format(lastDay);
+    }
+    section.append(element('p', 'visitor-period', period), layout);
     section.hidden = false;
   }
 
