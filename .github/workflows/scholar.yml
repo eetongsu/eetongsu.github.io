@@ -22,7 +22,7 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Check API configuration
         id: config
@@ -34,10 +34,9 @@ jobs:
           else
             echo 'ready=false' >> "$GITHUB_OUTPUT"
             echo '::notice::Add the SERPAPI_API_KEY repository secret to enable daily Scholar updates. Existing metrics are unchanged.'
-            echo 'Waiting for the SERPAPI_API_KEY repository secret. No Scholar request or website change was made.' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Scholar refresh is waiting for the SERPAPI_API_KEY repository secret.' >> "$GITHUB_STEP_SUMMARY"
           fi
       - name: Check out main
-        if: steps.config.outputs.ready == 'true'
         uses: actions/checkout@v7
         with:
           ref: main
@@ -67,7 +66,7 @@ jobs:
           due = profile.get('snapshot_date') != today or os.environ.get('FORCE_REFRESH') == 'true'
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('ready=' + str(due).lower() + '\n')
-          message = 'A Scholar refresh is due.' if due else 'Already synchronized today; no API request or deployment needed.'
+          message = 'A Scholar refresh is due.' if due else "Today's snapshot is already saved. Checking the public homepage."
           print(message)
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
               summary.write(message + '\n')
@@ -93,8 +92,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'Update Google Scholar metrics'
           git push origin HEAD:main
-      - name: Publish the updated snapshot
-        if: steps.due.outputs.ready == 'true'
+      - name: Verify the public homepage and publish if needed
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run pages.yml --ref main --repo "$GITHUB_REPOSITORY"
+        run: bash scripts/ensure_scholar_published.sh
