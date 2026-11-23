@@ -7,7 +7,12 @@ from urllib.parse import quote
 
 ROOT=Path(__file__).resolve().parent
 OUT=ROOT/'docs'
-analytics_version = sha256((OUT/'assets/analytics.js').read_text(encoding='utf-8').encode('utf-8')).hexdigest()[:12]
+def asset_version(name):
+    return sha256((OUT/'assets'/name).read_text(encoding='utf-8').encode('utf-8')).hexdigest()[:12]
+
+analytics_version = asset_version('analytics.js')
+map_style_version = asset_version('visitor-map.css')
+map_script_version = asset_version('visitor-map.js')
 BASE='https://eetongsu.github.io'
 profile=json.loads((ROOT/'data/profile.json').read_text(encoding='utf-8'))
 papers=json.loads((ROOT/'data/publications.json').read_text(encoding='utf-8'))
@@ -103,7 +108,7 @@ def page(path,title,description,body,active='',extra='',structured=None):
     dest=OUT/path.lstrip('/')/'index.html';dest.parent.mkdir(parents=True,exist_ok=True)
     extra += f'<link rel="stylesheet" href="/assets/analytics.css"><script src="/assets/analytics.js?v={analytics_version}" defer></script>'
     if path == '/':
-        extra += '<link rel="stylesheet" href="/assets/visitor-map.css"><script src="/assets/visitor-map.js" defer></script>'
+        extra += f'<link rel="stylesheet" href="/assets/visitor-map.css?v={map_style_version}"><script src="/assets/visitor-map.js?v={map_script_version}" defer></script>'
     if path == '/' and profile.get('google_site_verification'):
         extra += '<meta name="google-site-verification" content="'+e(profile['google_site_verification'])+'">'
     if structured is None:structured={'@context':'https://schema.org','@type':'WebPage','name':title,'url':BASE+path}
@@ -124,7 +129,7 @@ synced_date=date.fromisoformat(profile['snapshot_date'])
 synced_label=synced_date.strftime('%B')+' '+str(synced_date.day)+', '+str(synced_date.year)
 metric='<div class="metricbar"><div class="metrics">'+''.join('<div class="metric"><strong>'+format(profile['metrics'][key],',')+'</strong><span>'+label+'</span></div>' for key,label in [('citations','Citations'),('h_index','h-index'),('i10_index','i10-index')])+'</div><div class="metricsource"><a href="'+scholar+'">Google Scholar</a><br>Last synced · '+e(synced_label)+'</div></div>'
 person={'@context':'https://schema.org','@type':'ProfilePage','name':'Tong Su · Power Systems & AI','url':BASE+'/', 'mainEntity':{'@type':'Person','@id':BASE+'/#person','name':'Tong Su','email':profile['email'],'jobTitle':'Ph.D. Candidate and Research Assistant','affiliation':{'@type':'CollegeOrUniversity','name':'Dartmouth College'},'sameAs':[scholar],'knowsAbout':['Power system transient stability','Safe reinforcement learning','Uncertainty quantification','Grid-enhancing technologies']}}
-visitor_map='<section id="visitor-map" class="section" aria-labelledby="visitor-map-heading"><h2 id="visitor-map-heading">Visitors by country or region</h2><noscript>Enable JavaScript to view the map.</noscript></section>'
+visitor_map='<section id="visitor-map" class="section" aria-labelledby="visitor-map-heading"><h2 id="visitor-map-heading">Visitor locations</h2><noscript>Enable JavaScript to view the map.</noscript></section>'
 page('/','Tong Su · Power Systems & AI','Tong Su, Ph.D. candidate and research assistant at Dartmouth College. Research in power system stability, safe learning, uncertainty, and grid-enhancing technologies.',hero()+focus+selected+metric+visitor_map,'About',structured=person)
 
 sortpapers=sorted(papers,key=lambda p:(-(int(p.get('year') or 0)),p['title'].lower()))

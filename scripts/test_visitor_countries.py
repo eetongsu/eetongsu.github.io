@@ -6,7 +6,9 @@ from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
-from update_visitor_countries import public_snapshot, refresh, report_query
+from update_visitor_countries import CITY_DIMENSIONS, add_locations, public_snapshot, refresh, report_query
+from visitor_centers import city_centers
+from zipfile import ZipFile
 
 
 END = date(2027, 11, 21)
@@ -22,7 +24,58 @@ def report(*entries):
     }
 
 
+def city_report(*entries):
+    return {
+        "dimensionHeaders": [{"name": name} for name in CITY_DIMENSIONS],
+        "metricHeaders": [{"name": "activeUsers", "type": "TYPE_INTEGER"}],
+        "rowCount": len(entries),
+        "rows": [{"dimensionValues": [{"value": v} for v in row[:-1]], "metricValues": [{"value": row[-1]}]}
+                 for row in entries],
+    }
+
+
 class CountryMapTests(unittest.TestCase):
+    def test_city_markers_and_deduplicated_country_fallback(self):
+        snapshot = public_snapshot(report(("US", "6"), ("CA", "1")), END)
+        city_rows = city_report(("US", "101", "Springfield", "Illinois", "5"),
+                               ("US", "0", "(not set)", "(not set)", "1"),
+                               ("US", "999", "Missing Place", "Illinois", "1"),
+                               ("CA", "0", "(not set)", "(not set)", "1"))
+        reports = [city_rows, report(("US", "1"))]
+        queries = []
+        def fetch(query):
+            queries.append(query)
+            return reports.pop(0)
+        with patch("update_visitor_countries.city_centers", return_value={("US", "Springfield", "Illinois"): (39.8, -89.65)}):
+            add_locations(snapshot, {}, fetch, END, None)
+        self.assertEqual(snapshot["country_only"], {"US": "1–4", "CA": "1–4"})
+        self.assertEqual(snapshot["cities"]["101"]["band"], "5–19")
+        self.assertEqual(snapshot["cities"]["101"]["lat"], 39.8)
+        filters = queries[1]["dimensionFilter"]["andGroup"]["expressions"]
+        self.assertEqual(filters[-1]["filter"]["inListFilter"]["values"], ["0", "999"])
+
+    def test_city_backfill_replaces_legacy_country_dot_and_preserves_history(self):
+        city = {"city": "Boston", "region": "Massachusetts", "country": "US", "lat": 42.36,
+                "lon": -71.06, "band": "1–4"}
+        snapshot = public_snapshot(report(("US", "2")), END)
+        old = {"countries": {"US": "1–4", "DE": "5–19"}, "cities": {"1": city}}
+        with patch("update_visitor_countries.city_centers", return_value={}):
+            add_locations(snapshot, old, lambda q: city_report(("US", "1", "Boston", "Massachusetts", "2")), END, None)
+        self.assertEqual(snapshot["country_only"], {"DE": "5–19"})
+        self.assertEqual(snapshot["cities"], old["cities"])
+
+    def test_gazetteer_uses_region_and_declines_ambiguous_places(self):
+        places = {("US", "Springfield", "Ohio"), ("US", "Springfield", "(not set)"),
+                  ("US", "Springfield", "Texas"), ("US", "Springfield", "Oregon")}
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            (folder/"admin1CodesASCII.txt").write_text("US.OH\tOhio\tOhio\t1\nUS.OR\tOregon\tOregon\t2\n")
+            with ZipFile(folder/"cities500.zip", "w") as archive:
+                archive.writestr("cities500.txt", "1\tSpringfield\tSpringfield\t\t39.92\t-83.81\tP\tPPL\tUS\t\tOH\n"
+                                 "2\tSpringfield\tSpringfield\t\t44.05\t-123.02\tP\tPPL\tUS\t\tOR\n")
+            self.assertEqual(city_centers(places, folder), {("US", "Springfield", "Ohio"): (39.92, -83.81),
+                                                            ("US", "Springfield", "Oregon"): (44.05, -123.02)})
+
     def test_query_scopes_domain_and_period(self):
         query = report_query(END)
         span, = query["dateRanges"]
@@ -61,7 +114,8 @@ class CountryMapTests(unittest.TestCase):
                 (report(), {"DE": "5–19", "US": "5–19"}),
             ]
             for response, expected in cases:
-                with patch("update_visitor_countries.urlopen", return_value=io.BytesIO(json.dumps(response).encode())):
+                with patch("update_visitor_countries.urlopen", side_effect=[
+                        io.BytesIO(json.dumps(response).encode()), io.BytesIO(json.dumps(city_report()).encode())]):
                     refresh("123456", "test", END, path)
                 self.assertEqual(json.loads(path.read_text(encoding="utf-8"))["countries"], expected)
 

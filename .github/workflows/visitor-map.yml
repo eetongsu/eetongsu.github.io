@@ -30,6 +30,13 @@ jobs:
           python-version: '3.13'
       - name: Test public map aggregation
         run: python -m unittest discover -s scripts -p 'test_visitor_countries.py'
+      - name: Load public city centers from GeoNames
+        run: |
+          mkdir -p "$RUNNER_TEMP/gazetteer"
+          for file in cities500.zip admin1CodesASCII.txt; do
+            curl --fail --silent --show-error --location --retry 3 --max-time 90 \
+              "https://download.geonames.org/export/dump/$file" -o "$RUNNER_TEMP/gazetteer/$file"
+          done
       - name: Obtain read-only Analytics token
         id: auth
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
@@ -39,8 +46,9 @@ jobs:
           token_format: access_token
           access_token_scopes: https://www.googleapis.com/auth/analytics.readonly
           create_credentials_file: false
-      - name: Generate public country ranges
+      - name: Generate city points and country-level ranges
         env:
+          VISITOR_GAZETTEER: ${{ runner.temp }}/gazetteer
           GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID }}
           GA4_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
         run: python scripts/update_visitor_countries.py
