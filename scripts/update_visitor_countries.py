@@ -12,23 +12,28 @@ from zoneinfo import ZoneInfo
 
 
 OUTPUT = Path(__file__).resolve().parents[1] / "docs" / "assets" / "visitor-countries.json"
-TRACKING_START = date(2026, 11, 21)
+# The cumulative map went live at 16:48:23 in the GA4 property's New York time.
+# GA4 reports event times by minute, so omit the mixed rollout minute.
+TRACKING_START = datetime(2026, 11, 21, 16, 49)
 BANDS = ("1–4", "5–19", "20–49", "50+")
 
 
 def report_query(end):
-    if end < TRACKING_START:
+    if end < TRACKING_START.date():
         raise ValueError("End date precedes the first day of collection.")
     return {
-        "dateRanges": [{"startDate": TRACKING_START.isoformat(),
+        "dateRanges": [{"startDate": TRACKING_START.date().isoformat(),
                         "endDate": end.isoformat()}],
         "dimensions": [{"name": "countryId"}],
         "metrics": [{"name": "activeUsers"}],
         "dimensionFilter": {"andGroup": {"expressions": [
             {"filter": {"fieldName": "hostName", "stringFilter": {
                 "matchType": "EXACT", "value": "eetongsu.github.io"}}},
-            {"filter": {"fieldName": "contentGroup", "stringFilter": {
-                "matchType": "EXACT", "value": "public-visitor-map-v2"}}},
+            {"filter": {"fieldName": "eventName", "stringFilter": {
+                "matchType": "EXACT", "value": "page_view"}}},
+            {"filter": {"fieldName": "dateHourMinute", "numericFilter": {
+                "operation": "GREATER_THAN_OR_EQUAL",
+                "value": {"int64Value": TRACKING_START.strftime("%Y%m%d%H%M")}}}},
         ]}},
         "metricFilter": {"filter": {"fieldName": "activeUsers", "numericFilter": {
             "operation": "GREATER_THAN_OR_EQUAL", "value": {"int64Value": "1"}}}},
@@ -66,7 +71,7 @@ def public_snapshot(report, end):
         count = int(value)
         if count:
             countries[code] = BANDS[bisect_right((5, 20, 50), count)]
-    return {"start_date": TRACKING_START.isoformat(), "end_date": end.isoformat(), "countries": countries}
+    return {"start_date": TRACKING_START.date().isoformat(), "end_date": end.isoformat(), "countries": countries}
 
 
 def refresh(property_id, access_token, end, path=OUTPUT):

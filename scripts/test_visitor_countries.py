@@ -30,8 +30,11 @@ class CountryMapTests(unittest.TestCase):
         self.assertEqual(query["dimensionFilter"]["andGroup"]["expressions"], [
             {"filter": {"fieldName": "hostName", "stringFilter": {
                 "matchType": "EXACT", "value": "eetongsu.github.io"}}},
-            {"filter": {"fieldName": "contentGroup", "stringFilter": {
-                "matchType": "EXACT", "value": "public-visitor-map-v2"}}}])
+            {"filter": {"fieldName": "eventName", "stringFilter": {
+                "matchType": "EXACT", "value": "page_view"}}},
+            {"filter": {"fieldName": "dateHourMinute", "numericFilter": {
+                "operation": "GREATER_THAN_OR_EQUAL",
+                "value": {"int64Value": "202611211649"}}}}])
         self.assertEqual(query["metricFilter"]["filter"]["numericFilter"]["value"], {"int64Value": "1"})
 
     def test_only_coarse_public_ranges(self):
