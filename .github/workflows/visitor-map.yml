@@ -1,0 +1,67 @@
+name: Refresh private visitor dashboard
+on:
+  schedule:
+    - cron: '43 14 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: visitor-map
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.repository_id == '1400871394' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify dashboard is inaccessible anonymously
+        run: |
+          test "$(curl -sS --retry 2 --max-time 15 -o /dev/null -w '%{http_code}' https://api.github.com/repos/eetongsu/visitor-map-private)" = 404
+      - name: Check out only the private dashboard
+        uses: actions/checkout@v7
+        with:
+          repository: eetongsu/visitor-map-private
+          ref: main
+          path: dashboard
+          ssh-key: ${{ secrets.PRIVATE_VISITOR_MAP_DEPLOY_KEY }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Read public gazetteer
+        run: |
+          mkdir -p "$RUNNER_TEMP/gazetteer"
+          for file in cities500.zip admin1CodesASCII.txt; do
+            curl -fsSL --retry 3 --max-time 90 "https://download.geonames.org/export/dump/$file" -o "$RUNNER_TEMP/gazetteer/$file"
+          done
+      - name: Obtain read-only Analytics token
+        id: auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093
+        with:
+          workload_identity_provider: ${{ vars.GA4_WIF_PROVIDER }}
+          service_account: ${{ vars.GA4_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/analytics.readonly
+          create_credentials_file: false
+      - name: Refresh dashboard in its private checkout
+        working-directory: dashboard
+        env:
+          VISITOR_GAZETTEER: ${{ runner.temp }}/gazetteer
+          GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID }}
+          GA4_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: |
+          python -m unittest discover -s scripts
+          python scripts/update_visitor_countries.py
+          python scripts/render_map.py
+      - name: Save to the private repository
+        working-directory: dashboard
+        run: |
+          test "$(curl -sS --retry 2 --max-time 15 -o /dev/null -w '%{http_code}' https://api.github.com/repos/eetongsu/visitor-map-private)" = 404
+          git add -- data/locations.json README.md map.svg interactive-map.html
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit --quiet -m 'Refresh private visitor dashboard'
+          git push --quiet origin HEAD:main
