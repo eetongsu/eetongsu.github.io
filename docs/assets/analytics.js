@@ -49,7 +49,6 @@
       window.gtag('js', new Date());
       window.gtag('config', id, {
         allow_google_signals: false, allow_ad_personalization_signals: false,
-        content_group: 'public-visitor-map-v2',
         cookie_domain: location.hostname, cookie_prefix: 'tsresearch'
       });
       const tag = document.createElement('script');
@@ -84,7 +83,7 @@
       '<h2 id="analytics-heading" tabindex="-1">Visitor analytics</h2>' +
       '<p>This site uses Google Analytics to measure page views, PDF clicks and outgoing links. ' +
       'Analytics cookies are on by default in the US. Elsewhere, visits are measured without analytics cookies ' +
-      'unless you allow them. The public map shows cumulative active-user ranges at approximate city centers or, when unavailable, by country or region. ' +
+      'unless you allow them. The site owner can view aggregated visitor locations in Analytics. ' +
       '<a href="https://policies.google.com/technologies/partner-sites">How Google uses this data</a>.</p>' +
       '<p class="analytics-status"></p></div><div class="analytics-actions">' +
       '<button type="button" data-consent="allow">Allow analytics cookies</button>' +

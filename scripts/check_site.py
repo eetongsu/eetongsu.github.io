@@ -30,6 +30,7 @@ class Page(HTMLParser):
 
 
 pages = list(DOCS.rglob('*.html'))
+assert not (DOCS / 'assets/visitor-countries.json').exists(), 'Visitor data must stay out of the public site'
 assert pages, 'No generated HTML pages'
 for file in pages:
     doc = file.read_text(encoding='utf-8')
